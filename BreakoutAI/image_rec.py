@@ -1,9 +1,13 @@
+from datetime import datetime
 from pprint import pprint
 
 from PIL import Image
 
+from dims import Dims
+
+
 class ImageRec:
-    
+
     COLOR_BRICK = (255, 0, 0)
     COLOR_BALL = (0, 255, 0)
     COLOR_PADDLE = (0, 0, 255)
@@ -11,19 +15,23 @@ class ImageRec:
     def __init__(self, image_bytes) -> None:
         super().__init__()
         self.image = Image.open(image_bytes)
+        #self.save_image()
         self.analyse()
-    
+
+    def save_image(self):
+        image_filename = datetime.now().strftime("images/%Y_%m_%d_%H_%M_%S_%f.png")
+        self.image.save(image_filename, "PNG")
+
     def get_data(self):
-        return self.has_bricks, self.ball_x, self.paddle_x
+        return self.has_bricks, self.ball_dims, self.paddle_dims
         
     def analyse(self):
         (self.width, self.height) = self.image.size
         image_data = list(self.image.getdata())
         
-        max_ball_x = -1
-        min_ball_x = self.width
-        max_paddle_x = -1
-        min_paddle_x = self.width
+        self.ball_dims = Dims(self.width, self.height)
+        self.paddle_dims = Dims(self.width, self.height)
+        
         self.has_bricks = False
         for y in range(0, self.height):
             for x in range(0, self.width):
@@ -31,16 +39,6 @@ class ImageRec:
                 if byte_color == self.COLOR_BRICK:
                     self.has_bricks = True
                 elif byte_color == self.COLOR_BALL:
-                    if x > max_ball_x:
-                        max_ball_x = x
-                    if x < min_ball_x:
-                        min_ball_x = x
+                    self.ball_dims.update_dims(x, y)
                 elif byte_color == self.COLOR_PADDLE:
-                    if x > max_paddle_x:
-                        max_paddle_x = x
-                    if x < min_paddle_x:
-                        min_paddle_x = x
-        
-        self.ball_x = (min_ball_x + max_ball_x) / 2
-        self.paddle_x = (min_paddle_x + max_paddle_x) / 2
-        print("Image: (", self.width, ", ", self.height, "), Ball X: ", self.ball_x, " (", min_ball_x, "..", max_ball_x, "); Paddle X: ", self.paddle_x, " (", min_paddle_x, "..", max_paddle_x, ")")
+                    self.paddle_dims.update_dims(x, y)

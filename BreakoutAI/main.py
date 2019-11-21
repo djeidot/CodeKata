@@ -2,6 +2,7 @@
 from argparse import ArgumentParser
 
 from image_rec import ImageRec
+from predictive_ai import PredictiveAI
 from socket_helper import SocketHelper
 
 
@@ -15,8 +16,8 @@ def parse_args():
                         help="Serve images as TYPE. Default %(default)s")
     parser.add_argument('-s', '--speed', type=int, choices=range(1, 20),
                         help="Select speed. Smaller number is faster.")
-    parser.set_defaults(host='10.44.121.45', port=0xB407, format='png', speed=8)
-    #parser.set_defaults(host='localhost', port=0xB407, format='png', speed=8)
+    #parser.set_defaults(host='10.44.121.45', port=0xB407, format='png', speed=8)
+    parser.set_defaults(host='localhost', port=0xB407, format='png', speed=8)
     args = parser.parse_args()
     return args
 
@@ -25,20 +26,17 @@ def main():
     args = parse_args()
     sock = SocketHelper(args.host, args.port)
     sock.send_command("G")
+    predict_ai = PredictiveAI()
 
     has_bricks = True
     while has_bricks:
         image_bytes = sock.get_image()
         image_rec = ImageRec(image_bytes)
-        has_bricks, ball_x, paddle_x = image_rec.get_data()
-        
+        has_bricks, ball_dims, paddle_dims = image_rec.get_data()
+
         if has_bricks:
-            if ball_x < paddle_x:
-                sock.send_command("L")
-            elif ball_x > paddle_x:
-                sock.send_command("R")
-            else:
-                sock.send_command(".")
+            command = predict_ai.get_command(ball_dims, paddle_dims)
+            sock.send_command(command)
 
 if __name__ == '__main__':
     main()
