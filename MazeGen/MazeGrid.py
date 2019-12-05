@@ -51,29 +51,50 @@ class MazeGrid:
 
         image.save(filename, "PNG")
 
-    def buildWall(self, block, neighbour):
+    def _setWall(self, block, neighbour, up, shadow=False):
         for i in range(0, 4):
             if block.nbors[i] == neighbour:
-                block.walls[i] = True
+                if shadow:
+                    block.shadow_walls[i] = up
+                else:
+                    block.walls[i] = up
 
             if neighbour.nbors[i] == block:
-                neighbour.walls[i] = True
+                if shadow:
+                    neighbour.shadow_walls[i] = up
+                else:
+                    neighbour.walls[i] = up    
+
+    def buildShadowWall(self, block, neighbour):
+        self._setWall(block, neighbour, True, shadow=True)
     
-    def get_block(self, r, c):
-        return self.grid[r][c]
+    def removeShadowWalls(self, block, turnToReal):
+        for i in range(0, 4):
+            if block.shadow_walls[i]:
+                block.shadow_walls[i] = False
+                if turnToReal:
+                    block.walls[i] = True
     
-    def find_path(self, start: MazeBlock, end: MazeBlock = None):
-        # if start is already picked, return
-        if start.picked:
-            return
-        
-        start.picked = True
+    def breakWall(self, block, neighbour):    
+        self._setWall(block, neighbour, False, True)
+        self._setWall(block, neighbour, False, False)
+    
+    def find_path(self, start: MazeBlock, end: bool):
+        self.blocks_in_path = [start]
         it_block = start
         while True:
-            # create array of unpicked neighbor
-            nbor_directions = list(filter(lambda dir: not it_block.walls[dir] and not it_block.nbors[dir].picked, range(0, 4)))
+            # create array of neighbors
+            nbor_directions = list(filter(lambda dir: it_block.nbors[dir] != EDGE and it_block.nbors[dir] not in self.blocks_in_path, range(0, 4)))
             # return if no neighbours available - got yourself cornered
             if len(nbor_directions) == 0:
+                # set as shadow and discard this path if not looking for an exit
+                for block in self.blocks_in_path:
+                    if not end:
+                        block.shadow = True
+                    else:
+                        block.picked = True
+                        self.removeShadowWalls(block, turnToReal=True)
+                        self.remaining_blocks.remove(block)
                 return
             # pick one of the neighbours
             picked_nbor_direction = random.choice(nbor_directions)
@@ -81,11 +102,39 @@ class MazeGrid:
             # close borders with all other neighbours
             for dir in nbor_directions:
                 if dir != picked_nbor_direction:
-                    self.buildWall(it_block, it_block.nbors[dir])
-            # add neighbour to list of picked blocks
-            picked_neighbour.picked = True
-            # if neighbour is end, stop here
-            if picked_neighbour == end:
+                    self.buildShadowWall(it_block, it_block.nbors[dir])
+            # add neighbour to blocks in path
+            self.blocks_in_path.append(picked_neighbour)
+            # if joined main thread or reached the end, stop here
+            if picked_neighbour.picked:
+                self.breakWall(it_block, picked_neighbour)
+                for block in self.blocks_in_path:
+                    block.picked = True
+                    self.removeShadowWalls(block, turnToReal=True)
+                    if block in self.remaining_blocks:
+                        self.remaining_blocks.remove(block)
                 return
             # otherwise, set neighbour to it_block and iterate
             it_block = picked_neighbour
+
+    def clear_shadow_blocks(self):
+        for it_block in self.blocks_in_path:
+            if it_block.shadow:
+                it_block.shadow = False
+                self.removeShadowWalls(it_block, turnToReal=False)
+                for nbor in it_block.nbors:
+                    self.removeShadowWalls(nbor, turnToReal=False)
+        
+    def make_maze(self):
+        self.find_path(self.grid[int(self.height / 2)][int(self.width / 2)], True)
+        # self.draw("image.png")
+        
+        while len(self.remaining_blocks) > 0:
+            self.clear_shadow_blocks()
+            # self.draw("image.png")
+            
+            random_start_block = random.choice(self.remaining_blocks)
+            self.find_path(random_start_block, False)
+            # self.draw("image.png")
+
+        self.draw("image.png")

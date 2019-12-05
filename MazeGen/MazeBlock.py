@@ -1,6 +1,6 @@
 from PIL import ImageDraw
 
-from MazeGen.constants import CELL_SIZE, BORDER_SIZE, WALL, UP, DOWN, LEFT, RIGHT, PICKED
+from MazeGen.constants import CELL_SIZE, BORDER_SIZE, WALL, UP, DOWN, LEFT, RIGHT, FREE, SHADOW, SHADOW_WALL
 
 
 class MazeBlock:
@@ -10,7 +10,9 @@ class MazeBlock:
         self.c = c
         self.nbors = [None, None, None, None]
         self.walls = [False, False, False, False]
+        self.shadow_walls = [False, False, False, False]
         self.picked = False
+        self.shadow = False
 
     def __str__(self) -> str:
         if self.r == -1 and self.c == -1:
@@ -28,8 +30,10 @@ class MazeBlock:
 
         draw = ImageDraw.Draw(image)
         
-        if self.picked:
-            draw.rectangle([corner_nw, corner_se], PICKED)
+        if self.shadow:
+            draw.rectangle([corner_nw, corner_se], SHADOW)
+        elif not self.picked:
+            draw.rectangle([corner_nw, corner_se], FREE)
 
         image.putpixel(corner_nw, WALL)
         image.putpixel(corner_ne, WALL)
@@ -44,6 +48,7 @@ class MazeBlock:
         for d in range(0, 4):
             if self.walls[d]:
                 draw.line(edges[d], WALL)
-
+            elif self.shadow_walls[d]:
+                draw.line(edges[d], SHADOW_WALL)
 
 EDGE = MazeBlock(-1, -1)
