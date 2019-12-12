@@ -1,10 +1,11 @@
+import pygame
 from PIL import ImageDraw
 
 from MazeGen.constants import CELL_SIZE, BORDER_SIZE, WALL, UP, DOWN, LEFT, RIGHT, FREE, SHADOW, SHADOW_WALL
 
 
 class MazeBlock:
-    
+
     def __init__(self, r, c) -> None:
         self.r = r
         self.c = c
@@ -17,10 +18,10 @@ class MazeBlock:
     def __str__(self) -> str:
         if self.r == -1 and self.c == -1:
             return "EDGE"
-        
+
         return chr(ord('A') + self.r) + str(self.c)
 
-    def draw(self, image):
+    def draw_image(self, image):
         y = BORDER_SIZE + self.r * CELL_SIZE
         x = BORDER_SIZE + self.c * CELL_SIZE
         corner_nw = (x, y)
@@ -29,7 +30,7 @@ class MazeBlock:
         corner_se = (x + CELL_SIZE - 1, y + CELL_SIZE - 1)
 
         draw = ImageDraw.Draw(image)
-        
+
         if self.shadow:
             draw.rectangle([corner_nw, corner_se], SHADOW)
         elif not self.picked:
@@ -50,5 +51,35 @@ class MazeBlock:
                 draw.line(edges[d], WALL)
             elif self.shadow_walls[d]:
                 draw.line(edges[d], SHADOW_WALL)
+
+    def draw_screen(self, screen):
+        y = BORDER_SIZE + self.r * CELL_SIZE
+        x = BORDER_SIZE + self.c * CELL_SIZE
+        corner_nw = (x, y)
+        corner_ne = (x + CELL_SIZE - 1, y)
+        corner_sw = (x, y + CELL_SIZE - 1)
+        corner_se = (x + CELL_SIZE - 1, y + CELL_SIZE - 1)
+
+        if self.shadow:
+            pygame.draw.rect(screen, SHADOW, (corner_nw[0], corner_nw[1], corner_se[0] - corner_nw[0], corner_se[1] - corner_nw[1]))
+        elif not self.picked:
+            pygame.draw.rect(screen, FREE, (corner_nw[0], corner_nw[1], corner_se[0] - corner_nw[0], corner_se[1] - corner_nw[1]))
+
+        screen.set_at(corner_nw, WALL)
+        screen.set_at(corner_ne, WALL)
+        screen.set_at(corner_sw, WALL)
+        screen.set_at(corner_se, WALL)
+
+        edges = {UP: [corner_nw, corner_ne],
+                 RIGHT: [corner_ne, corner_se],
+                 DOWN: [corner_sw, corner_se],
+                 LEFT: [corner_nw, corner_sw]}
+
+        for d in range(0, 4):
+            if self.walls[d]:
+                pygame.draw.line(screen, WALL, edges[d][0], edges[d][1])
+            elif self.shadow_walls[d]:
+                pygame.draw.line(screen, SHADOW_WALL, edges[d][0], edges[d][1])
+
 
 EDGE = MazeBlock(-1, -1)

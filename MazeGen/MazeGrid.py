@@ -1,5 +1,7 @@
 import random
+import time
 
+import pygame
 from PIL import Image, ImageDraw
 
 from MazeGen.MazeBlock import MazeBlock, EDGE
@@ -10,6 +12,8 @@ class MazeGrid:
     def __init__(self, width, height):
         self.width = width
         self.height = height
+        self.screen_width = CELL_SIZE * self.width + BORDER_SIZE * 2
+        self.screen_height = CELL_SIZE * self.height + BORDER_SIZE * 2
 
         self.grid = [[MazeBlock(r, c) for c in range(0, width)] for r in range(0, height)]
 
@@ -31,25 +35,35 @@ class MazeGrid:
         self.picked_blocks = []
         self.remaining_blocks = [self.grid[r][c] for r in range(0, height) for c in range(0, width)]
 
-    def draw(self, filename):
-        image_width = CELL_SIZE * self.width + BORDER_SIZE * 2
-        image_height = CELL_SIZE * self.height + BORDER_SIZE * 2
-
-        image = Image.new('RGB', (image_width, image_height), WHITE)
+    def draw_image(self, filename):
+        image = Image.new('RGB', (self.screen_width, self.screen_height), WHITE)
         draw = ImageDraw.Draw(image)
 
-        draw.line([(BORDER_SIZE - 1, BORDER_SIZE - 1), (image_width - BORDER_SIZE, BORDER_SIZE - 1)], WALL)
-        draw.line([(BORDER_SIZE - 1, BORDER_SIZE - 1), (BORDER_SIZE - 1, image_height - BORDER_SIZE)], WALL)
-        draw.line([(image_width - BORDER_SIZE, BORDER_SIZE - 1), (image_width - BORDER_SIZE, image_height - BORDER_SIZE)],
+        draw.line([(BORDER_SIZE - 1, BORDER_SIZE - 1), (self.screen_width - BORDER_SIZE, BORDER_SIZE - 1)], WALL)
+        draw.line([(BORDER_SIZE - 1, BORDER_SIZE - 1), (BORDER_SIZE - 1, self.screen_height - BORDER_SIZE)], WALL)
+        draw.line([(self.screen_width - BORDER_SIZE, BORDER_SIZE - 1), (self.screen_width - BORDER_SIZE, self.screen_height - BORDER_SIZE)],
                   WALL)
-        draw.line([(BORDER_SIZE - 1, image_height - BORDER_SIZE), (image_width - BORDER_SIZE, image_height - BORDER_SIZE)],
+        draw.line([(BORDER_SIZE - 1, self.screen_height - BORDER_SIZE), (self.screen_width - BORDER_SIZE, self.screen_height - BORDER_SIZE)],
                   WALL)
 
         for r in range(0, self.height):
             for c in range (0, self.width):
-                self.grid[r][c].draw(image)
+                self.grid[r][c].draw_image(image)
 
         image.save(filename, "PNG")
+
+    def draw_screen(self, screen):
+        screen.fill(WHITE)
+        pygame.draw.line(screen, WALL, (BORDER_SIZE - 1, BORDER_SIZE - 1), (self.screen_width - BORDER_SIZE, BORDER_SIZE - 1))
+        pygame.draw.line(screen, WALL, (BORDER_SIZE - 1, BORDER_SIZE - 1), (BORDER_SIZE - 1, self.screen_height - BORDER_SIZE))
+        pygame.draw.line(screen, WALL, (self.screen_width - BORDER_SIZE, BORDER_SIZE - 1), (self.screen_width - BORDER_SIZE, self.screen_height - BORDER_SIZE))
+        pygame.draw.line(screen, WALL, (BORDER_SIZE - 1, self.screen_height - BORDER_SIZE), (self.screen_width - BORDER_SIZE, self.screen_height - BORDER_SIZE))
+
+        for r in range(0, self.height):
+            for c in range (0, self.width):
+                self.grid[r][c].draw_screen(screen)
+
+        pygame.display.flip()
 
     def _setWall(self, block, neighbour, up, shadow=False):
         for i in range(0, 4):
@@ -67,18 +81,18 @@ class MazeGrid:
 
     def buildShadowWall(self, block, neighbour):
         self._setWall(block, neighbour, True, shadow=True)
-    
+
     def removeShadowWalls(self, block, turnToReal):
         for i in range(0, 4):
             if block.shadow_walls[i]:
                 block.shadow_walls[i] = False
                 if turnToReal:
                     block.walls[i] = True
-    
-    def breakWall(self, block, neighbour):    
+
+    def breakWall(self, block, neighbour):
         self._setWall(block, neighbour, False, True)
         self._setWall(block, neighbour, False, False)
-    
+
     def find_path(self, start: MazeBlock, end: bool):
         self.blocks_in_path = [start]
         it_block = start
@@ -124,17 +138,17 @@ class MazeGrid:
                 self.removeShadowWalls(it_block, turnToReal=False)
                 for nbor in it_block.nbors:
                     self.removeShadowWalls(nbor, turnToReal=False)
-        
-    def make_maze(self):
+
+    def make_maze(self, screen):
         self.find_path(self.grid[int(self.height / 2)][int(self.width / 2)], True)
-        # self.draw("image.png")
-        
+
         while len(self.remaining_blocks) > 0:
             self.clear_shadow_blocks()
-            # self.draw("image.png")
-            
+
             random_start_block = random.choice(self.remaining_blocks)
             self.find_path(random_start_block, False)
-            # self.draw("image.png")
 
-        self.draw("image.png")
+            self.draw_screen(screen)
+            time.sleep(0.1)
+
+        self.draw_image("image.png")
