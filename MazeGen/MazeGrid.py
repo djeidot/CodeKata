@@ -77,7 +77,7 @@ class MazeGrid:
                 if shadow:
                     neighbour.shadow_walls[i] = up
                 else:
-                    neighbour.walls[i] = up    
+                    neighbour.walls[i] = up
 
     def buildShadowWall(self, block, neighbour):
         self._setWall(block, neighbour, True, shadow=True)
@@ -148,7 +148,31 @@ class MazeGrid:
             random_start_block = random.choice(self.remaining_blocks)
             self.find_path(random_start_block, False)
 
-            self.draw_screen(screen)
-            time.sleep(0.1)
+            # self.draw_screen(screen)
+            # time.sleep(0.1)
 
         self.draw_image("image.png")
+        self.draw_screen(screen)
+        
+    def toggle_path(self, block, neighbour):
+        for i in range(0, 4):
+            if block.nbors[i] == neighbour:
+                block.paths[i] = not block.paths[i]
+
+            if neighbour.nbors[i] == block:
+                neighbour.paths[i] = not neighbour.paths[i]
+        
+    def solve_maze(self, screen, start, end):
+        it_block = self.grid[start[0]][start[1]]
+        end_block = self.grid[end[0]][end[1]]
+
+        dir = 0
+        while it_block != end_block:
+            dir = (dir + 3) % 4
+            while it_block.walls[dir] or it_block.nbors[dir] == EDGE:
+                dir = (dir + 1) % 4
+
+            self.toggle_path(it_block, it_block.nbors[dir])
+            it_block = it_block.nbors[dir]
+
+            self.draw_screen(screen)

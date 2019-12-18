@@ -15,6 +15,7 @@ def main():
     screen = pygame.display.set_mode((maze_grid.screen_width, maze_grid.screen_height))
     
     maze_grid.make_maze(screen)
+    maze_grid.solve_maze(screen, (0, 0), (39, 39))
 
     running = True
     while running:

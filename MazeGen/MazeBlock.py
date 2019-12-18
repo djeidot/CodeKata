@@ -1,7 +1,7 @@
 import pygame
 from PIL import ImageDraw
 
-from MazeGen.constants import CELL_SIZE, BORDER_SIZE, WALL, UP, DOWN, LEFT, RIGHT, FREE, SHADOW, SHADOW_WALL
+from MazeGen.constants import CELL_SIZE, BORDER_SIZE, WALL, UP, DOWN, LEFT, RIGHT, FREE, SHADOW, SHADOW_WALL, PATH
 
 
 class MazeBlock:
@@ -12,6 +12,7 @@ class MazeBlock:
         self.nbors = [None, None, None, None]
         self.walls = [False, False, False, False]
         self.shadow_walls = [False, False, False, False]
+        self.paths = [False, False, False, False]
         self.picked = False
         self.shadow = False
 
@@ -59,6 +60,7 @@ class MazeBlock:
         corner_ne = (x + CELL_SIZE - 1, y)
         corner_sw = (x, y + CELL_SIZE - 1)
         corner_se = (x + CELL_SIZE - 1, y + CELL_SIZE - 1)
+        center = (x + (CELL_SIZE - 1) / 2, y + (CELL_SIZE - 1) / 2)
 
         if self.shadow:
             pygame.draw.rect(screen, SHADOW, (corner_nw[0], corner_nw[1], corner_se[0] - corner_nw[0], corner_se[1] - corner_nw[1]))
@@ -74,6 +76,11 @@ class MazeBlock:
                  RIGHT: [corner_ne, corner_se],
                  DOWN: [corner_sw, corner_se],
                  LEFT: [corner_nw, corner_sw]}
+        
+        sides = {UP: (center[0], corner_nw[1]),
+                 RIGHT: (corner_se[0], center[1]),
+                 DOWN: (center[0], corner_se[1]),
+                 LEFT: (corner_nw[0], center[1])}
 
         for d in range(0, 4):
             if self.walls[d]:
@@ -81,5 +88,7 @@ class MazeBlock:
             elif self.shadow_walls[d]:
                 pygame.draw.line(screen, SHADOW_WALL, edges[d][0], edges[d][1])
 
+            if self.paths[d]:
+                pygame.draw.line(screen, PATH, center, sides[d], 2)
 
 EDGE = MazeBlock(-1, -1)
