@@ -7,6 +7,8 @@ SHADOW_WALL = (96, 96, 96)
 PATH = (0, 0, 255)
 BLACK = (0, 0, 0)
 WALL = BLACK
+OPEN = (0, 255, 0)
+CLOSED = (255, 0, 0)
 
 UP = 0
 RIGHT = 1

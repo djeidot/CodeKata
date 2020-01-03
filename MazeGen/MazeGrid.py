@@ -1,5 +1,6 @@
 import random
 import time
+from functools import reduce
 
 import pygame
 from PIL import Image, ImageDraw
@@ -162,17 +163,60 @@ class MazeGrid:
             if neighbour.nbors[i] == block:
                 neighbour.paths[i] = not neighbour.paths[i]
         
+        
+    def dist(self, block1, block2):
+        return (abs(block1.r - block2.r) + abs(block1.c - block2.c)) * 10
+        
     def solve_maze(self, screen, start, end):
-        it_block = self.grid[start[0]][start[1]]
+        start_block = self.grid[start[0]][start[1]]
         end_block = self.grid[end[0]][end[1]]
 
         dir = 0
-        while it_block != end_block:
-            dir = (dir + 3) % 4
-            while it_block.walls[dir] or it_block.nbors[dir] == EDGE:
-                dir = (dir + 1) % 4
+        it_block = start_block
+        as_block = start_block
+        as_block.open = True
+        openset = [as_block]
+        
+        while it_block != end_block or as_block != end_block:
+            if it_block != end_block:
+                it_block = end_block    #skip
+                
+                # Iterate normal
+                # dir = (dir + 3) % 4
+                # while it_block.walls[dir] or it_block.nbors[dir] == EDGE:
+                #     dir = (dir + 1) % 4
+                # 
+                # self.toggle_path(it_block, it_block.nbors[dir])
+                # it_block = it_block.nbors[dir]
+            
+            if as_block != end_block:
+                # Iterate A-star
+                as_block = openset[0] if len(openset) == 1 else reduce(lambda a, b: a if a.f_cost() < b.f_cost() or (a.f_cost() == b.f_cost and a.h_cost < b.h_cost) else b, openset[1:], openset[0])
+                as_block.open = False
+                as_block.closed = True
+                openset.remove(as_block)
 
-            self.toggle_path(it_block, it_block.nbors[dir])
-            it_block = it_block.nbors[dir]
+                if as_block == end_block:
+                    continue
+
+                for i_dir in range(0, 4):
+                    nbor = as_block.nbors[i_dir]
+                    if as_block.walls[i_dir] or nbor == EDGE or nbor.closed:
+                        continue
+
+                    nbor_g_cost = as_block.g_cost + 10
+                    if not nbor.open or nbor_g_cost < nbor.g_cost:
+                        nbor.g_cost = nbor_g_cost
+                        nbor.h_cost = self.dist(nbor, end_block)
+                        nbor.a_star_parent = as_block
+                        nbor.open = True
+                        openset.append(nbor)
 
             self.draw_screen(screen)
+
+        as_block = end_block
+        while as_block != start_block:
+            self.toggle_path(as_block, as_block.a_star_parent)
+            as_block = as_block.a_star_parent
+            self.draw_screen(screen)
+        

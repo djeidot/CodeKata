@@ -10,7 +10,7 @@ def main():
     maze_grid = MazeGrid(40, 40)
 
     pygame.init()
-    pygame.display.set_caption("Battleship")
+    pygame.display.set_caption("MazeGen")
     
     screen = pygame.display.set_mode((maze_grid.screen_width, maze_grid.screen_height))
     
