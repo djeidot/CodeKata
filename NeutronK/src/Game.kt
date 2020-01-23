@@ -1,7 +1,10 @@
+import Enums.Piece
+import Players.Human
+import Players.Player
 import java.util.*
 
 class Game {
-    private var board: Board? = null
+    private var board: Board = Board()
     private var playerO: Player? = null
     private var playerX: Player? = null
 
@@ -35,7 +38,7 @@ class Game {
 
         playerO = setNewPlayer(playerOName, playerOClass, Piece.PlayerO, board)
         playerX = setNewPlayer(playerXName, playerXClass, Piece.PlayerX, board)
-        board.setPlayers(playerO, playerX, startingPlayer)
+        board.setPlayers(playerO!!, playerX!!, startingPlayer)
         board.show()
         return startingPlayer == Piece.PlayerX
     }
@@ -66,9 +69,9 @@ class Game {
         while (!gameEnd) {
             println("Round $round")
             if (playerXStarts) {
-                gameEnd = playerTurn(playerX) || playerTurn(playerO)
+                gameEnd = playerTurn(playerX!!) || playerTurn(playerO!!)
             } else {
-                gameEnd = playerTurn(playerO) || playerTurn(playerX)
+                gameEnd = playerTurn(playerO!!) || playerTurn(playerX!!)
             }
             round++
         }
@@ -76,14 +79,14 @@ class Game {
     }
 
     private fun playerTurn(player: Player): Boolean {
-        player.MoveNeutron()
+        player.moveNeutron()
         if (checkNeutronInBackLine()) {
             return true
         }
-        player.MovePlayerPiece()
+        player.movePlayerPiece()
         try {
             Thread.sleep(1000)
-        } catch (InterruptedException e) {
+        } catch (e: InterruptedException) {
             e.printStackTrace()
         }
         return checkNeutronBlocked(player.playerPiece)
@@ -101,7 +104,7 @@ class Game {
     }
 
     private fun checkNeutronBlocked(player: Piece): Boolean {
-        if (board.isNeutronBlocked) {
+        if (board.isNeutronBlocked()) {
             val loser = player.opponent()
             println("Player ${loser.mark} cannot move the neutron.")
             println("Player ${player.mark} wins!!!")

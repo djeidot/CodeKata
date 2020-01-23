@@ -2,7 +2,7 @@ package Enums
 
 import java.lang.IndexOutOfBoundsException
 
-data class Position(val r: Int, val c: Int) {
+data class Position(var r: Int, var c: Int) {
     
     constructor(posStr: String) : this(posStr[0] - 'A', posStr[1].toInt()) {
         if (this.isOffScreen()) {
@@ -10,12 +10,12 @@ data class Position(val r: Int, val c: Int) {
         }
     }
 
-    fun move(Direction dir) {
+    fun move(dir: Direction) {
         r += dir.v
         c += dir.h
     }
 
-    override fun toString() = "${('A' + r).toChar()}${c + 1}"
+    override fun toString() = "${('A' + r)}${c + 1}"
         
     fun isOffScreen() = !(r in 0..4 && c in 0..4)
 }
