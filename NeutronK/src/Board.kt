@@ -30,15 +30,6 @@ class Board() {
         invisible = true
     }
 
-    constructor(pojo: GamePojo) : this() {
-        for (r in 0..4) {
-            for (c in 0..4) {
-                this.board[r][c] = Piece.fromMark(pojo.board[r][c])
-            }
-        }
-        invisible = true
-    }
-    
     private fun pieceAt(position: Position) = board[position.r][position.c]
 
     private fun movePieceTo(from: Position, to: Position) {
