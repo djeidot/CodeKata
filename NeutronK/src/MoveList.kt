@@ -53,18 +53,15 @@ class MoveList {
         val builder = StringBuilder()
         builder.append(spacer)
         builder.append(" * " + String.format("%2s", line.player1Move.neutronMove))
-        val piece1Move = line.player1Move.pieceMove
-        if (piece1Move != null) {
-            builder.append(", ${piece1Move.first} ${String.format("%2s", piece1Move.second)} |")
+        if (line.player1Move.pieceMove != null) {
+            builder.append(", ${line.player1Move.pieceMove?.first} ${String.format("%2s", line.player1Move.pieceMove?.second)} |")
         } else {
             builder.append("        |")
         }
-        val player2Move = line.player2Move
-        if (player2Move != null) {
-            builder.append(" * " + String.format("%2s", player2Move.neutronMove))
-            val piece2Move = player2Move.pieceMove
-            if (piece2Move != null) {
-                builder.append(", ${piece2Move.first} ${String.format("%2s", piece2Move.second)}")
+        if (line.player2Move != null) {
+            builder.append(" * " + String.format("%2s", line.player2Move?.neutronMove))
+            if (line.player2Move?.pieceMove != null) {
+                builder.append(", ${line.player2Move?.pieceMove?.first} ${String.format("%2s", line.player2Move?.pieceMove?.second)}")
             }
         }
         return builder.toString()
