@@ -24,6 +24,7 @@ class Board() {
             }
             board += row
         }
+        board[2][2] = Piece.Neutron
     }
     
     constructor(other: Board) : this() {

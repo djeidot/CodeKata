@@ -15,13 +15,13 @@ class MoveList {
     
     private val spacer = "     "
 
-    fun setPlayers(playerO: Player, playerX: Player, startingPlayer: Player) {
+    fun setPlayers(playerO: Player, playerX: Player, startingPlayer: Piece) {
         when (startingPlayer) {
-            playerO -> {
+            Piece.PlayerO -> {
                 this.player1 = playerO
                 this.player2 = playerX
             }
-            playerX -> {
+            Piece.PlayerX -> {
                 this.player1 = playerX
                 this.player2 = playerO
             }

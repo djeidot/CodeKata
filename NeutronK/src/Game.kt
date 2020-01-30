@@ -1,7 +1,7 @@
 import Enums.Piece
+import Players.Cpu5
 import Players.Human
 import Players.Player
-import java.util.*
 
 class Game {
     private var board: Board = Board()
@@ -9,7 +9,7 @@ class Game {
     private var playerX: Player? = null
 
     init {
-        var playerXStarts = startNewGame()
+        val playerXStarts = startNewGame()
         loop(playerXStarts)
     }
 
@@ -17,9 +17,9 @@ class Game {
         board = Board()
 
         print("\nInput player names\nPlayer O: ")
-        var playerOName = readLine()!!.trim()
+        val playerOName = readLine()!!.trim()
         print("\nPlayer X: ")
-        var playerXName = readLine()!!.trim()
+        val playerXName = readLine()!!.trim()
 
         println("\nInput the type of player for both players (H - Human, C - CPU)")
         val playerOClass = getPlayerClass("Player O", playerOName)

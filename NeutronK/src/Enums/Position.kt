@@ -4,7 +4,7 @@ import java.lang.IndexOutOfBoundsException
 
 data class Position(var r: Int, var c: Int) {
     
-    constructor(posStr: String) : this(posStr[0] - 'A', posStr[1].toInt()) {
+    constructor(posStr: String) : this(posStr[0] - 'A', posStr[1].toString().toInt() - 1) {
         if (this.isOffScreen()) {
             throw IndexOutOfBoundsException("$posStr is not a valid position.")
         }
