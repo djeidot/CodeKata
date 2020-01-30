@@ -62,7 +62,7 @@ class Board() {
             println("|" + moveList.getMoveString(r))
         }
         println("      +---------+" + moveList.getMoveString(6))
-        for (i in 7 until moveList.getMoveLineCount()) {
+        for (i in 7 until moveList.moveLineCount) {
             println("                 " + moveList.getMoveString(i))
         }
     }
@@ -104,25 +104,25 @@ class Board() {
 
     private fun getLastMoveType(player: Player) = when {
         getNeutronBackLine() == player.playerPiece -> MoveType.losing
-        getNeutronBackLine() == player.playerPiece.opponent() || isNeutronBlocked() -> MoveType.winning
+        getNeutronBackLine() == player.playerPiece.opponent || isNeutronBlocked() -> MoveType.winning
         else -> MoveType.other
     }
 
-    fun getNeutron(): Position {
-        for (r in 0..4) {
-            for (c in 0..4) {
-                val pos = Position(r, c)
-                if (hasPiece(pos, Piece.Neutron)) {
-                    return pos
+    val neutron: Position
+        get() {
+            for (r in 0..4) {
+                for (c in 0..4) {
+                    val pos = Position(r, c)
+                    if (hasPiece(pos, Piece.Neutron)) {
+                        return pos
+                    }
                 }
             }
+            throw RuntimeException("Error - Neutron not found in board.")
         }
-        throw RuntimeException("Error - Neutron not found in board.")
-    }
 
     fun getNeutronBackLine(): Piece {
-        val posNeutron = getNeutron()
-        return when (posNeutron.r) {
+        return when (neutron.r) {
             0 -> Piece.PlayerX
             4 -> Piece.PlayerO
             else -> Piece.Empty
@@ -130,13 +130,7 @@ class Board() {
     }
 
     fun isNeutronBlocked(): Boolean {
-        val posNeutron = getNeutron()
-        for (dir in Direction.values()) {
-            if (canMove(posNeutron, dir)) {
-                return false
-            }
-        }
-        return true
+        return Direction.values().none { canMove(neutron, it) }
     }
 
     fun printIfVisible(str: String) {

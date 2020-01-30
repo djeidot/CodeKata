@@ -41,7 +41,7 @@ class MoveList {
     
     fun getHeaders() = "$spacer ${Format.center(player1!!.name, 12, true)}|${Format.center(player2!!.name, 12, false)}"
     
-    fun getSeparator() = spacer + "-------------|-------------"
+    fun getSeparator() = "$spacer-------------|-------------"
 
     fun getMoveString(lineNr: Int): String {
         // ex:    * NE, A1 SW  | * SE, E5 NW
@@ -49,7 +49,7 @@ class MoveList {
             return ""
         }
         
-        val line = moves.get(lineNr)
+        val line = moves[lineNr]
         val builder = StringBuilder()
         builder.append(spacer)
         builder.append(" * " + String.format("%2s", line.player1Move.neutronMove))
@@ -66,14 +66,14 @@ class MoveList {
         }
         return builder.toString()
     }
-    
-    fun getMoveLineCount() = moves.size
+
+    val moveLineCount get() = moves.size
 
     private fun addToList(move: PlayerMove) {
         if (moves.isEmpty()) {
             addNewMoveLine(move)
         } else {
-            val moveLine = moves.get(moves.size - 1)
+            val moveLine = moves.last()
             if (moveLine.player2Move == null) {
                 moveLine.player2Move = move
             } else {
@@ -83,12 +83,11 @@ class MoveList {
     }
 
     private fun addNewMoveLine(move: PlayerMove) {
-        val newMoveLine = MoveLine(move, null)
-        moves.add(newMoveLine)
+        moves += MoveLine(move, null)
     }
 
     private fun getLastMove() : PlayerMove {
-        val moveLine = moves.get(moves.size - 1)
+        val moveLine = moves.last()
         return moveLine.player2Move ?: moveLine.player1Move
     }
 }

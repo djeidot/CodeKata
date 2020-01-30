@@ -19,7 +19,7 @@ open class Cpu4(name: String, playerPiece: Piece, board: Board) : Cpu3(name, pla
         // Winning and other moves are gotten from the Cpu3 version of this method so we can call it now
         val startingMoves = super.getPlayerMoves(playerPiece, board)
 
-        if (startingMoves.get(0).moveType == MoveType.winning || startingMoves.get(0).moveType == MoveType.losing) {
+        if (startingMoves[0].moveType == MoveType.winning || startingMoves[0].moveType == MoveType.losing) {
             return startingMoves
         }
 
@@ -30,14 +30,14 @@ open class Cpu4(name: String, playerPiece: Piece, board: Board) : Cpu3(name, pla
         for (playerMove in startingMoves) {
             val vBoard4 = Board(board)
             try {
-                vBoard4.move(this, vBoard4.getNeutron(), Piece.Neutron, playerMove.neutronMove)
+                vBoard4.move(this, vBoard4.neutron, Piece.Neutron, playerMove.neutronMove)
                 vBoard4.move(this, playerMove.pieceMove!!.first, playerPiece, playerMove.pieceMove!!.second)
             } catch (e: InvalidMoveException) {
                 println("Cpu4 made a wrong move - ${e.message}")
             }
             
-            val opponentMoves = super.getPlayerMoves(playerPiece.opponent(), vBoard4)
-            when (opponentMoves.get(0).moveType) {
+            val opponentMoves = super.getPlayerMoves(playerPiece.opponent, vBoard4)
+            when (opponentMoves[0].moveType) {
                 MoveType.winning -> {
                     playerMove.moveType = MoveType.losing
                     losingMoves.add(playerMove)
@@ -53,7 +53,7 @@ open class Cpu4(name: String, playerPiece: Piece, board: Board) : Cpu3(name, pla
             }
         }
 
-        if (!winningMoves.isEmpty()) {
+        if (winningMoves.isNotEmpty()) {
             board.printIfVisible("Player ${playerPiece.mark} has a winning move")
             return winningMoves
         }
@@ -63,7 +63,7 @@ open class Cpu4(name: String, playerPiece: Piece, board: Board) : Cpu3(name, pla
             return losingMoves
         }
 
-        if (!losingMoves.isEmpty()) {
+        if (losingMoves.isNotEmpty()) {
             board.printIfVisible("Player ${playerPiece.mark} is avoiding ${losingMoves.size} losing moves")
         }
         

@@ -20,7 +20,7 @@ class Cpu5(name: String, playerPiece: Piece, board: Board) : Cpu4(name, playerPi
         // Winning and other moves are gotten from the Cpu4 version of this method so we can call it now
         val startingMoves = super.getPlayerMoves(playerPiece, board)
 
-        if (startingMoves.get(0).moveType == MoveType.winning || startingMoves.get(0).moveType == MoveType.losing) {
+        if (startingMoves[0].moveType == MoveType.winning || startingMoves[0].moveType == MoveType.losing) {
             return startingMoves
         }
 
@@ -29,26 +29,21 @@ class Cpu5(name: String, playerPiece: Piece, board: Board) : Cpu4(name, playerPi
         for (playerMove in startingMoves) {
             val vBoard5 = Board(board)
             try {
-                vBoard5.move(this, vBoard5.getNeutron(), Piece.Neutron, playerMove.neutronMove)
+                vBoard5.move(this, vBoard5.neutron, Piece.Neutron, playerMove.neutronMove)
                 vBoard5.move(this, playerMove.pieceMove!!.first, playerPiece, playerMove.pieceMove!!.second)
             } catch (e: InvalidMoveException) {
                 println("Cpu5 made a wrong move - ${e.message}")
             }
 
-            val neutronMoves = getPossibleMoves(vBoard5.getNeutron(), vBoard5).size
+            val neutronMoves = getPossibleMoves(vBoard5.neutron, vBoard5).size
             playerMove.neutronMovesAfter = neutronMoves
             if (neutronMoves < minimumMoves) {
                 minimumMoves = neutronMoves
             }
         }
-        
-        val bestMoves = mutableListOf<PlayerMove>()
-        for (playerMove in startingMoves) {
-            if (playerMove.neutronMovesAfter == minimumMoves) {
-                bestMoves.add(playerMove)
-            }
-        }
 
+        val bestMoves = startingMoves.filter { it.neutronMovesAfter == minimumMoves }
+        
         if (bestMoves.isEmpty()) {
             throw RuntimeException("Cpu5 miscalculated its moves")
         }

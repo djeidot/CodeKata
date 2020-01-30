@@ -17,7 +17,7 @@ open class Cpu1(name: String, playerPiece: Piece, board: Board) : Player(name, p
         
         println("Player ${playerPiece.mark} moving neutron to $dir")
         try {
-            board.move(this, board.getNeutron(), Piece.Neutron, dir)
+            board.move(this, board.neutron, Piece.Neutron, dir)
         } catch (e: InvalidMoveException) {
             println("Cpu1 made a wrong move - ${e.message}")
         }
@@ -38,7 +38,7 @@ open class Cpu1(name: String, playerPiece: Piece, board: Board) : Player(name, p
     }
 
     open fun chooseNeutronDirection(): Direction {
-        val moves = getPossibleMoves(board.getNeutron(), board)
+        val moves = getPossibleMoves(board.neutron, board)
         return choice(moves)
     }
 
@@ -55,16 +55,8 @@ open class Cpu1(name: String, playerPiece: Piece, board: Board) : Player(name, p
         return Pair(pos, dir)
     }
 
-    fun getPossibleMoves(pos: Position, board: Board): List<Direction> {
-        val moves = mutableListOf<Direction>()
-
-        for (dir in Direction.values()) {
-            if (board.canMove(pos, dir)) {
-                moves.add(dir)
-            }
-        }
-        return moves
-    }
+    fun getPossibleMoves(pos: Position, board: Board): List<Direction> =
+        Direction.values().filter { board.canMove(pos, it) }
 
     fun getPlayerPositions(board: Board, playerPiece: Piece): List<Position> {
         val positions = mutableListOf<Position>()
@@ -72,7 +64,7 @@ open class Cpu1(name: String, playerPiece: Piece, board: Board) : Player(name, p
             for (c in 0..4) {
                 val pos = Position(r, c)
                 if (board.hasPiece(pos, playerPiece)) {
-                    positions.add(pos)
+                    positions += pos
                 }
             }
         }
@@ -80,6 +72,6 @@ open class Cpu1(name: String, playerPiece: Piece, board: Board) : Player(name, p
     }
 
     fun <T> choice(possibleChoices: List<T>): T {
-        return possibleChoices.get(random.nextInt(possibleChoices.size))
+        return possibleChoices[random.nextInt(possibleChoices.size)]
     }
 }

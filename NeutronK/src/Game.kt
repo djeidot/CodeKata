@@ -13,7 +13,7 @@ class Game {
         loop(playerXStarts)
     }
 
-    fun startNewGame(): Boolean {
+    private fun startNewGame(): Boolean {
         board = Board()
 
         print("\nInput player names\nPlayer O: ")
@@ -28,8 +28,7 @@ class Game {
         var startingPlayer = Piece.Empty
         while (startingPlayer == Piece.Empty) {
             print("\nInput starting player (O or X): ")
-            val input = readLine()!!.trim().toUpperCase()
-            when (input) {
+            when (readLine()!!.trim().toUpperCase()) {
                 "O" -> startingPlayer = Piece.PlayerO
                 "X" -> startingPlayer = Piece.PlayerX
                 else -> println("\nStarting player not recognized")
@@ -54,9 +53,8 @@ class Game {
     private fun getPlayerClass(playerMark: String, playerName: String): String {
         while (true) {
             print("Player $playerMark ($playerName): ")
-            val input = readLine()!!.trim().toUpperCase()
 
-            when (input) {
+            when (val input = readLine()!!.trim().toUpperCase()) {
                 "H", "C" -> return input
             }
             println("Type of player not recognized. Please input H or C")
@@ -68,10 +66,10 @@ class Game {
         var round = 1
         while (!gameEnd) {
             println("Round $round")
-            if (playerXStarts) {
-                gameEnd = playerTurn(playerX!!) || playerTurn(playerO!!)
+            gameEnd = if (playerXStarts) {
+                playerTurn(playerX!!) || playerTurn(playerO!!)
             } else {
-                gameEnd = playerTurn(playerO!!) || playerTurn(playerX!!)
+                playerTurn(playerO!!) || playerTurn(playerX!!)
             }
             round++
         }
@@ -95,7 +93,7 @@ class Game {
     private fun checkNeutronInBackLine(): Boolean {
         val loser = board.getNeutronBackLine()
         if (loser == Piece.PlayerX || loser == Piece.PlayerO) {
-            val winner = loser.opponent()
+            val winner = loser.opponent
             println("Neutron is on player ${loser.mark}'s back line.")
             println("Player ${winner.mark} wins!!!")
             return true
@@ -105,7 +103,7 @@ class Game {
 
     private fun checkNeutronBlocked(player: Piece): Boolean {
         if (board.isNeutronBlocked()) {
-            val loser = player.opponent()
+            val loser = player.opponent
             println("Player ${loser.mark} cannot move the neutron.")
             println("Player ${player.mark} wins!!!")
             return true

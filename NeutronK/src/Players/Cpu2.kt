@@ -11,38 +11,41 @@ import java.lang.RuntimeException
 // However it treats neutron and piece moves separately.
 open class Cpu2(name: String, playerPiece: Piece, board: Board) : Cpu1(name, playerPiece, board) {
     override fun chooseNeutronDirection(): Direction {
-        val moves = getPossibleMoves(board.getNeutron(), board)
+        val moves = getPossibleMoves(board.neutron, board)
         val winningMoves = mutableListOf<Direction>()
         val losingMoves = mutableListOf<Direction>()
         val otherMoves = mutableListOf<Direction>()
 
         for (move in moves) {
-            if (canMoveNeutronToPlayersBackline(board, playerPiece.opponent(), move)) {
-                winningMoves.add(move)
-            } else if (canMoveNeutronToPlayersBackline(board, playerPiece, move)) {
-                losingMoves.add(move)
-            } else {
-                otherMoves.add(move)
+            when {
+                canMoveNeutronToPlayersBackLine(board, playerPiece.opponent, move) -> winningMoves.add(move)
+                canMoveNeutronToPlayersBackLine(board, playerPiece, move) -> losingMoves.add(move)
+                else -> otherMoves.add(move)
             }
         }
 
-        if (!winningMoves.isEmpty()) {
-            println("Player ${playerPiece.mark} has a winning move")
-            return choice(winningMoves)
-        } else if (!otherMoves.isEmpty()) {
-            return choice(otherMoves)
-        } else if (!losingMoves.isEmpty()) {
-            println("Player ${playerPiece.mark} forced to make a losing move")
-            return choice(losingMoves)
-        } else {
-            throw RuntimeException("No possible neutron moves - game should have been finished by now.")
+        return when {
+            winningMoves.isNotEmpty() -> {
+                println("Player ${playerPiece.mark} has a winning move")
+                choice(winningMoves)
+            }
+            otherMoves.isNotEmpty() -> {
+                choice(otherMoves)
+            }
+            losingMoves.isNotEmpty() -> {
+                println("Player ${playerPiece.mark} forced to make a losing move")
+                choice(losingMoves)
+            }
+            else -> {
+                throw RuntimeException("No possible neutron moves - game should have been finished by now.")
+            }
         }
     }
 
-    internal fun canMoveNeutronToPlayersBackline(board: Board, playerPiece: Piece, move: Direction): Boolean {
+    internal fun canMoveNeutronToPlayersBackLine(board: Board, playerPiece: Piece, move: Direction): Boolean {
         val vBoard2 = Board(board)
         try {
-            vBoard2.move(this, vBoard2.getNeutron(), Piece.Neutron, move)
+            vBoard2.move(this, vBoard2.neutron, Piece.Neutron, move)
         } catch (e: InvalidMoveException) {
             println("Cpu2 made a wrong move - ${e.message}")
         }
@@ -65,11 +68,11 @@ open class Cpu2(name: String, playerPiece: Piece, board: Board) : Cpu1(name, pla
             }
         }
 
-        if (!winningMoves.isEmpty()) {
+        return if (winningMoves.isNotEmpty()) {
             board.printIfVisible("Player ${playerPiece.mark} has a winning move")
-            return choice(winningMoves)
+            choice(winningMoves)
         } else {
-            return choice(otherMoves)
+            choice(otherMoves)
         }
     }
 

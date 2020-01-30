@@ -14,7 +14,7 @@ class Human(name: String, playerPiece: Piece, board: Board) : Player(name, playe
 
         try {
             val dir = Direction.valueOf(input)
-            board.move(this, board.getNeutron(), Piece.Neutron, dir)
+            board.move(this, board.neutron, Piece.Neutron, dir)
         } catch (e: IllegalArgumentException) {
             println("$input is not a valid direction")
             moveNeutron()

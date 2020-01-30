@@ -6,13 +6,12 @@ enum class Piece(val mark: String) {
     Neutron("*"),
     Empty(" ");
 
-    fun opponent(): Piece {
-        return when (this) {
+    val opponent: Piece
+        get() = when (this) {
             PlayerO -> PlayerX
             PlayerX -> PlayerO
             else -> this
         }
-    }
     
     fun isPlayer() = this == PlayerX || this == PlayerO
 

@@ -4,13 +4,12 @@ import Board
 import Enums.Direction
 import Enums.MoveType
 import Enums.Piece
-import Enums.Position
 import Exceptions.InvalidMoveException
 import PlayerMove
 
 open class Cpu3(name: String, playerPiece: Piece, board: Board) : Cpu2(name, playerPiece, board) {
 
-    lateinit var playerMove: PlayerMove
+    private lateinit var playerMove: PlayerMove
     
     override fun chooseNeutronDirection(): Direction {
         this.playerMove = choice(getPlayerMoves(playerPiece, board))
@@ -25,22 +24,26 @@ open class Cpu3(name: String, playerPiece: Piece, board: Board) : Cpu2(name, pla
         // Otherwise it returns a list of normal moves
         // Losing moves are avoided unless there is no other choice
 
-        val neutronMoves = getPossibleMoves(board.getNeutron(), board)
+        val neutronMoves = getPossibleMoves(board.neutron, board)
         val winningNeutronMoves = mutableListOf<PlayerMove>()
         val losingNeutronMoves = mutableListOf<PlayerMove>()
         val otherNeutronMoves = mutableListOf<PlayerMove>()
 
         for (move in neutronMoves) {
-            if (canMoveNeutronToPlayersBackline(board, playerPiece.opponent(), move)) {
-                winningNeutronMoves.add(PlayerMove(this, move, null, MoveType.winning))
-            } else if (canMoveNeutronToPlayersBackline(board, playerPiece, move)) {
-                losingNeutronMoves.add(PlayerMove(this, move, null, MoveType.losing))
-            } else {
-                otherNeutronMoves.add(PlayerMove(this, move, null, MoveType.other))
+            when {
+                canMoveNeutronToPlayersBackLine(board, playerPiece.opponent, move) -> {
+                    winningNeutronMoves.add(PlayerMove(this, move, null, MoveType.winning))
+                }
+                canMoveNeutronToPlayersBackLine(board, playerPiece, move) -> {
+                    losingNeutronMoves.add(PlayerMove(this, move, null, MoveType.losing))
+                }
+                else -> {
+                    otherNeutronMoves.add(PlayerMove(this, move, null, MoveType.other))
+                }
             }
         }
 
-        if (!winningNeutronMoves.isEmpty()) {
+        if (winningNeutronMoves.isNotEmpty()) {
             board.printIfVisible("Player ${playerPiece.mark} has a winning move")
             return winningNeutronMoves
         } else if (otherNeutronMoves.isEmpty()) {
@@ -54,7 +57,7 @@ open class Cpu3(name: String, playerPiece: Piece, board: Board) : Cpu2(name, pla
         for (neutronMove in otherNeutronMoves) {
             val vBoard3 = Board (board)
             try {
-                vBoard3.move(this, vBoard3.getNeutron(), Piece.Neutron, neutronMove.neutronMove)
+                vBoard3.move(this, vBoard3.neutron, Piece.Neutron, neutronMove.neutronMove)
             } catch (e: InvalidMoveException) {
                 println("Cpu3 made a wrong move - ${e.message}")
             }
@@ -72,11 +75,11 @@ open class Cpu3(name: String, playerPiece: Piece, board: Board) : Cpu2(name, pla
             }
         }
 
-        if (!winningPieceMoves.isEmpty()) {
+        return if (winningPieceMoves.isNotEmpty()) {
             board.printIfVisible("Player ${playerPiece.mark} has a winning move")
-            return winningPieceMoves
+            winningPieceMoves
         } else {
-            return otherPieceMoves
+            otherPieceMoves
         }
     }
 }
