@@ -8,7 +8,7 @@ import PlayerMove
 
 // Cpu4 will try to anticipate winning moves by the opponent player so that it can identify
 // and avoid losing moves by the current player
-class Cpu4(name: String, playerPiece: Piece, board: Board) : Cpu3(name, playerPiece, board) {
+open class Cpu4(name: String, playerPiece: Piece, board: Board) : Cpu3(name, playerPiece, board) {
 
     override fun getPlayerMoves(playerPiece: Piece, board: Board): List<PlayerMove> {
         // Returns a list of possible moves
